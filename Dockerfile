@@ -1,6 +1,5 @@
-# ubunut 15 saves about 50MB over ubuntu stable
-FROM ubuntu:15.10
-MAINTAINER Joey Baker <joey@byjoeybaker.com>
+FROM cloudron/base:0.10.0
+MAINTAINER Shane Perry <sperry@devfoundry.org>
 
 ENV SYNCTHING_VERSION 0.14.28
 
@@ -19,7 +18,7 @@ RUN gpg --keyserver pgp.mit.edu --recv-keys B42F6819007F00F88E364FD4036A9C25BF35
   && chmod +x /usr/local/bin/gosu
 
 # get syncthing
-WORKDIR /srv
+WORKDIR /app/code
 RUN useradd --no-create-home -g users syncthing
 RUN curl -L -o syncthing.tar.gz https://github.com/syncthing/syncthing/releases/download/v$SYNCTHING_VERSION/syncthing-linux-amd64-v$SYNCTHING_VERSION.tar.gz \
   && tar -xzvf syncthing.tar.gz \
@@ -27,15 +26,15 @@ RUN curl -L -o syncthing.tar.gz https://github.com/syncthing/syncthing/releases/
   && mv syncthing-linux-amd64-v* syncthing \
   && rm -rf syncthing/etc \
   && rm -rf syncthing/*.pdf \
-  && mkdir -p /srv/config \
-  && mkdir -p /srv/data
+  && mkdir -p /app/config \
+  && mkdir -p /app/data \
+  && mkdir -p /app/code
 
-VOLUME ["/srv/data", "/srv/config"]
+VOLUME ["/apd/data", "/app/config"]
 
-ADD ./start.sh /srv/start.sh
-RUN chmod 770 /srv/start.sh
+ADD /app/code/start.sh /app/code/start.sh
+RUN chmod 770 /app/code/start.sh
 
 ENV UID=1027
-
-ENTRYPOINT ["/srv/start.sh"]
-
+# make cloudron exec sane 
+WORKDIR /app/data 
